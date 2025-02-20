@@ -34,25 +34,29 @@ export default function Home() {
     };
     checkConnect();
   }, []);
-  interface loginForm {
-    username: string;
-    password: string;
-    email: string;
-    first_name: string;
-    last_name: string;
-  }
+  // interface loginForm {
+  //   username: string;
+  //   password: string;
+  //   email: string;
+  //   first_name: string;
+  //   last_name: string;
+  // }
 
-  const [formData, setFormData] = useState<loginForm>({
-    username: "",
-    password: "",
-    email: "",
-    first_name: "",
-    last_name: "",
-  });
+  // const [formData, setFormData] = useState<loginForm>({
+  //   username: "",
+  //   password: "",
+  //   email: "",
+  //   first_name: "",
+  //   last_name: "",
+  // });
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [first_name, setFirst_name] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [last_name, setLast_name] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [email, setEmail] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
