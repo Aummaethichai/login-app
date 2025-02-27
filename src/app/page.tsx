@@ -9,7 +9,7 @@ import Typography from "@mui/material/Typography";
 import { Box, Divider, TextField } from "@mui/material";
 import Link from "next/link";
 
-export default function Home() {
+export default function Login() {
   useEffect(() => {
     const checkConnect = async () => {
       try {
@@ -58,7 +58,7 @@ export default function Home() {
     console.log(data);
   };
 
-  console.log(formData)
+  // console.log(formData)
   return (
     <div className="flex justify-center items-center">
       <div className="">
