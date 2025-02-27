@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 // import { Pool } from "pg";
 import { ResponseMessages } from "@/utils/globalMessages";
 import { createClient } from "@supabase/supabase-js";
-import CryptoJS from "crypto-js";
 import bcrypt from "bcryptjs";
 // import crypto from "crypto";
 // const pool = new Pool({
