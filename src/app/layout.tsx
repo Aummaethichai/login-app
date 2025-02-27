@@ -28,8 +28,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased w-screen h-screen flex justify-center items-center MuiPaper-root`}
       >
-        <SpeedInsights/>
         {children}
+        <SpeedInsights/>
       </body>
     </html>
   );
