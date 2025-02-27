@@ -181,7 +181,7 @@ export default function Home() {
       }
       setIsLoading(true);
       const encryptedPassword = encryptPassword(password);
-      const response = await fetch("/api/v1/login", {
+      const response = await fetch("/api/v1/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

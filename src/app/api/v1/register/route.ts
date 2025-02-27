@@ -2,16 +2,38 @@ import { NextRequest, NextResponse } from "next/server";
 // import { Pool } from "pg";
 import { ResponseMessages } from "@/utils/globalMessages";
 import { createClient } from "@supabase/supabase-js";
-
+import CryptoJS from "crypto-js";
+import bcrypt from "bcryptjs";
+// import crypto from "crypto";
 // const pool = new Pool({
 //   connectionString: process.env.DATABASE_URL,
 // });
 
 const supabaseUrl = `${process.env.SUPABASE_URL}`;
 const supabaseAnonKey = `${process.env.SUPABASE_ANON_KEY}`;
+// const cryptoSecretKey = `${process.env.CRYPTO_SECRET_KEY}`;
 
 // const client = await pool.connect();
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// const encodeHash = (val: string) => {
+//   const bytes = CryptoJS.AES.encrypt(val, cryptoSecretKey).toString();
+
+//   const encrypt = bytes.toString(CryptoJS.enc.Utf8);
+//   return encrypt;
+// };
+
+const hasPwHelper = async (pw:string) => {
+  try {
+    const myPlaintextPassword = pw;
+
+    return await bcrypt.hash(myPlaintextPassword, 10);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error) {
+    return null;
+  }
+}
+
 
 export async function POST(req: NextRequest) {
   try {
@@ -56,10 +78,11 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+    const hashPassword = await hasPwHelper(password);
     const { error } = await supabase.from("users").insert([
       {
         username: username,
-        password: password,
+        password: hashPassword,
         email: email,
         first_name: first_name,
         last_name: last_name,
