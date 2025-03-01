@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-
+import CryptoJS from "crypto-js";
 // import Box from '@mui/material/Box';
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -8,6 +8,14 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { Box, Divider, TextField } from "@mui/material";
 import Link from "next/link";
+
+const cryptoSecretKey = `${process.env.NEXT_PUBLIC_CRYPTO_SECRET_KEY}`;
+
+const encryptPassword = async (password: string) => {
+  const encrypted = CryptoJS.AES.encrypt(password, cryptoSecretKey).toString();
+  const encodedPassword = encodeURIComponent(encrypted);
+  return encodedPassword
+};
 
 export default function Login() {
   useEffect(() => {
@@ -21,38 +29,22 @@ export default function Login() {
     };
     checkConnect();
   }, []);
-  interface loginForm {
-    username: string;
-    password: string;
-    // email: string;
-    // firstname: string;
-    // lastname: string;
-  }
-
-  const [formData, setFormData] = useState<loginForm>({
-    username: "",
-    password: "",
-    // email: "",
-    // firstname: "",
-    // lastname: "",
-  });
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSubmit = async () => {
-    setFormData({
-      username: username,
-      password: password,
-    })
-
+    const encryptedPassword = await encryptPassword(password);
     // รอสร้าง user
     const response = await fetch("/api/v1/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(formData),
+      body: JSON.stringify({
+        username,
+        password: encryptedPassword,
+      }),
     });
     const data = await response.json();
     console.log(data);
@@ -109,16 +101,11 @@ export default function Login() {
               <Divider sx={{ flexGrow: 1 }} />
             </Box>
             <Link href={"/register"}>
-            <div className="flex justify-center">
-              <Button
-                size="large"
-                variant="contained"
-                color="success"
-                onClick={handleSubmit}
-              >
-                สร้างบัญชีใหม่
-              </Button>
-            </div>
+              <div className="flex justify-center">
+                <Button size="large" variant="contained" color="success">
+                  สร้างบัญชีใหม่
+                </Button>
+              </div>
             </Link>
           </CardContent>
           {/* <CardActions>
