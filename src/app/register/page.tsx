@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import CryptoJS from "crypto-js";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Button from "@mui/material/Button";
@@ -16,14 +15,14 @@ import {
 } from "@mui/material";
 import Stack from "@mui/joy/Stack";
 import LinearProgress from "@mui/joy/LinearProgress";
-// import Typography from '@mui/joy/Typography';
 import Link from "next/link";
 import Typography from "@mui/joy/Typography";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import IconButton from "@mui/material/IconButton";
+import CryptoJS from "crypto-js";
 
-const cryptoSecretKey = `${process.env.CRYPTO_SECRET_KEY}`;
+const cryptoSecretKey = `${process.env.NEXT_PUBLIC_CRYPTO_SECRET_KEY}`;
 
 const validateEmail = (email: string)=> {
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -31,9 +30,11 @@ const validateEmail = (email: string)=> {
   return emailPattern.test(email);
 }
 
-const encryptPassword = (password: string) => {
+
+const encryptPassword = async (password: string) => {
   const encrypted = CryptoJS.AES.encrypt(password, cryptoSecretKey).toString();
-  return encodeURIComponent(encrypted);
+  const encodedPassword = encodeURIComponent(encrypted);
+  return encodedPassword
 };
 
 export default function Home() {
@@ -180,7 +181,7 @@ export default function Home() {
         setAlertMatchPassword(false);
       }
       setIsLoading(true);
-      const encryptedPassword = encryptPassword(password);
+      const encodedPassword = await encryptPassword(password);
       const response = await fetch("/api/v1/register", {
         method: "POST",
         headers: {
@@ -188,7 +189,7 @@ export default function Home() {
         },
         body: JSON.stringify({
           username,
-          password: encryptedPassword,
+          password: encodedPassword,
           email,
           first_name,
           last_name,

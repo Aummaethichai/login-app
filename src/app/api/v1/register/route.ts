@@ -1,28 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
-// import { Pool } from "pg";
 import { ResponseMessages } from "@/utils/globalMessages";
 import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
-// import crypto from "crypto";
+import CryptoJS from "crypto-js";
 // const pool = new Pool({
 //   connectionString: process.env.DATABASE_URL,
 // });
 
 const supabaseUrl = `${process.env.SUPABASE_URL}`;
 const supabaseAnonKey = `${process.env.SUPABASE_ANON_KEY}`;
-// const cryptoSecretKey = `${process.env.CRYPTO_SECRET_KEY}`;
+const cryptoSecretKey = `${process.env.CRYPTO_SECRET_KEY}`;
 
 // const client = await pool.connect();
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// const encodeHash = (val: string) => {
-//   const bytes = CryptoJS.AES.encrypt(val, cryptoSecretKey).toString();
+async function decryptPassword(password: string) {
+  try{
+    const decodedPassword = decodeURIComponent(password);
+    const decrypt = CryptoJS.AES.decrypt(decodedPassword, cryptoSecretKey).toString(CryptoJS.enc.Utf8);
+    return decrypt;
+  } catch (error) {
+    console.error("Decryption error:", error);
+    return null;
+  }
+};
 
-//   const encrypt = bytes.toString(CryptoJS.enc.Utf8);
-//   return encrypt;
-// };
-
-const hasPwHelper = async (pw:string) => {
+const hashPassword = async (pw:string) => {
   try {
     const myPlaintextPassword = pw;
 
@@ -32,7 +35,6 @@ const hasPwHelper = async (pw:string) => {
     return null;
   }
 }
-
 
 export async function POST(req: NextRequest) {
   try {
@@ -77,11 +79,20 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    const hashPassword = await hasPwHelper(password);
+    const decryptedPassword = await decryptPassword(password);
+    if (!decryptedPassword) {
+      console.log("Error decrypting password");
+    }
+    const hashedPassword = await hashPassword(`${decryptedPassword}`); // 🔹 Hash ด้วย bcrypt
+    
+    if (!hashedPassword) {
+      // return res.status(500).json({ message: "Error hashing password" });
+      console.log("Error hashing password");
+    }
     const { error } = await supabase.from("users").insert([
       {
         username: username,
-        password: hashPassword,
+        password: hashedPassword,
         email: email,
         first_name: first_name,
         last_name: last_name,
