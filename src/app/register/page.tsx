@@ -91,18 +91,6 @@ export default function Home() {
   const handleClickShowConfirmPassword = () =>
     setShowConfirmPassword((show) => !show);
 
-  // const handleMouseDownPassword = (
-  //   event: React.MouseEvent<HTMLButtonElement>
-  // ) => {
-  //   event.preventDefault();
-  // };
-
-  // const handleMouseUpPassword = (
-  //   event: React.MouseEvent<HTMLButtonElement>
-  // ) => {
-  //   event.preventDefault();
-  // };
-
   const showAlert = (
     type: "success" | "error" | "warning",
     message: string
@@ -196,16 +184,16 @@ export default function Home() {
         }),
       });
       const data = await response.json();
-      if (data.status === "success" && data.status_code === 201) {
+      if (data.status_code === 201) {
         setFirst_name("");
         setLast_name("");
         setEmail("");
         setUsername("");
         setPassword("");
         setConfirmPassword("");
-        showAlert("success", data.message);
+        showAlert("success", data.status_description);
       } else {
-        showAlert("error", data.message);
+        showAlert("error", data.status_description);
         if (
           data.status === "error" &&
           data.status_code === 400 &&

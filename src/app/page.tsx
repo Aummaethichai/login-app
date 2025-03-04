@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import { useEffect, useState } from "react";
 import CryptoJS from "crypto-js";
@@ -6,8 +7,9 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import { Box, Divider, TextField } from "@mui/material";
+import { Box, Divider, FormControl, IconButton, InputAdornment, InputLabel, LinearProgress, OutlinedInput, Stack, TextField } from "@mui/material";
 import Link from "next/link";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const cryptoSecretKey = `${process.env.NEXT_PUBLIC_CRYPTO_SECRET_KEY}`;
 
@@ -17,7 +19,20 @@ const encryptPassword = async (password: string) => {
   return encodedPassword
 };
 
+interface validateLoginForm {
+  empty_username: boolean;
+  empty_password: boolean;
+}
+
 export default function Login() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [validateLoginForm, setValidateLoginForm] = useState<validateLoginForm>({
+    empty_username: false,
+    empty_password: false,
+  });
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+
   useEffect(() => {
     const checkConnect = async () => {
       try {
@@ -35,7 +50,7 @@ export default function Login() {
 
   const handleSubmit = async () => {
     const encryptedPassword = await encryptPassword(password);
-    // รอสร้าง user
+
     const response = await fetch("/api/v1/login", {
       method: "POST",
       headers: {
@@ -46,11 +61,15 @@ export default function Login() {
         password: encryptedPassword,
       }),
     });
+    
     const data = await response.json();
-    console.log(data);
+    if(data.status_code === 200){
+      localStorage.setItem('first_name',data.result.first_name)
+      localStorage.setItem('last_name',data.result.last_name)
+      window.location.href = "/home";
+    }
   };
 
-  // console.log(formData)
   return (
     <div className="flex justify-center items-center">
       <div className="">
@@ -72,13 +91,54 @@ export default function Login() {
               />
             </div>
             <div className="mb-4">
-              <TextField
-                fullWidth
-                id="outlined-textarea"
-                label="รหัสผ่าน"
-                placeholder="รหัสผ่าน"
-                onChange={(password) => setPassword(password.target.value)}
-              />
+            <Stack
+                spacing={0.5}
+                sx={{ "--hue": Math.min(password.length * 10, 120), mb: 2 }}
+              >
+                <FormControl sx={{ m: 1 }} variant="outlined">
+                  <InputLabel
+                    required
+                    htmlFor="adornment-password"
+                    // error={validateForm.empty_password}
+                  >
+                    รหัสผ่าน
+                  </InputLabel>
+                  <OutlinedInput
+                    fullWidth
+                    autoComplete="off"
+                    // error={validateForm.empty_password}
+                    id="outlined-adornment-password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(password) => {
+                      setPassword(password.target.value);
+                      if (password.target.value === "") {
+                        validateLoginForm.empty_password = true;
+                      } else {
+                        validateLoginForm.empty_password = false;
+                      }
+                    }}
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label={
+                            showPassword
+                              ? "hide the password"
+                              : "display the password"
+                          }
+                          onClick={handleClickShowPassword}
+                          // onMouseDown={handleMouseDownPassword}
+                          // onMouseUp={handleMouseUpPassword}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    }
+                    label="รหัสผ่าน"
+                  />
+                </FormControl>
+              </Stack>
             </div>
             <Button
               fullWidth
@@ -108,9 +168,6 @@ export default function Login() {
               </div>
             </Link>
           </CardContent>
-          {/* <CardActions>
-            <Button size="small">Learn More</Button>
-          </CardActions> */}
         </Card>
       </div>
     </div>
