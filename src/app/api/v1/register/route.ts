@@ -3,15 +3,11 @@ import { ResponseMessages } from "@/utils/globalMessages";
 import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
 import CryptoJS from "crypto-js";
-// const pool = new Pool({
-//   connectionString: process.env.DATABASE_URL,
-// });
 
 const supabaseUrl = `${process.env.SUPABASE_URL}`;
 const supabaseAnonKey = `${process.env.SUPABASE_ANON_KEY}`;
 const cryptoSecretKey = `${process.env.CRYPTO_SECRET_KEY}`;
 
-// const client = await pool.connect();
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 async function decryptPassword(password: string) {
@@ -42,7 +38,7 @@ export async function POST(req: NextRequest) {
     const { username, password, email, first_name, last_name } = body;
     if (!username || !password) {
       return NextResponse.json(
-        ResponseMessages.error(
+        ResponseMessages.ErrorBadRequest(
           `กรุณากรอก ${!username ? "ชื่อผู้ใช้" : "รหัสผ่าน"}`,
           400
         ),
@@ -54,7 +50,7 @@ export async function POST(req: NextRequest) {
 
     if (!first_name || !last_name) {
       return NextResponse.json(
-        ResponseMessages.error(
+        ResponseMessages.ErrorBadRequest(
           `กรุณากรอก ${!first_name ? "ชื่อ" : "นามสกุล"}`,
           400
         ),
@@ -65,7 +61,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!email) {
-      return NextResponse.json(ResponseMessages.error(`กรุณากรอกอีเมล`, 400), {
+      return NextResponse.json(ResponseMessages.ErrorBadRequest(`กรุณากรอกอีเมล`, 400), {
         status: 400,
       });
     }
@@ -73,11 +69,12 @@ export async function POST(req: NextRequest) {
       .from("users")
       .select("username")
       .eq("username", username);
+    
     if (find_dup_username.data?.length !== 0) {
-      return NextResponse.json(
-        ResponseMessages.error("มีชื่อผู้ใช้นี้อยู่ในระบบแล้ว", 400),
-        { status: 400 }
+      const { response, options } = ResponseMessages.ErrorBadRequest(
+        "มีชื่อผู้ใช้นี้อยู่ในระบบแล้ว"
       );
+      return NextResponse.json(response, options);
     }
     const decryptedPassword = await decryptPassword(password);
     if (!decryptedPassword) {
@@ -100,24 +97,17 @@ export async function POST(req: NextRequest) {
     ]);
 
     if (error) {
-      console.error(error);
       if (error.code === "23505") {
-        return NextResponse.json(
-          ResponseMessages.error("มีที่อยู่อีเมลนี้อยู่ในระบบแล้ว", 400),
-          { status: 400 }
-        );
+        const {response, options} = ResponseMessages.ErrorBadRequest('มีที่อยู่อีเมลนี้อยู่ในระบบแล้ว')
+        return NextResponse.json(response, options);
       }
-      return NextResponse.json(ResponseMessages.error(error.message, 500), {
-        status: 500,
-      });
+      return NextResponse.json({error: error.message}, {status: 500});
     }
 
-    return NextResponse.json(
-      ResponseMessages.success("สร้างบัญชีสําเร็จ", 201),
-      { status: 201 }
-    );
+    const { response, options } = ResponseMessages.Created("สร้างบัญชีสําเร็จ");
+    return NextResponse.json(response, options);
   } catch (error) {
     console.error("Error:", error);
-    return NextResponse.json(ResponseMessages.error("Error"));
+    return NextResponse.error();
   }
 }
