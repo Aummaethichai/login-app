@@ -1,7 +1,7 @@
 import { unauthorized } from "next/navigation";
 
 export const ResponseMessages = {
-  Success: (message: string, status_code = 200, data?: object) => ({
+  Success: (message: string, data?: object, status_code = 200) => ({
     response: {
       status_code,
       status_description: message,
