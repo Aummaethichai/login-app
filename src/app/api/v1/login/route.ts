@@ -105,8 +105,7 @@ export async function POST(req: NextRequest) {
     
     const { response, options } = ResponseMessages.Success(
       "เข้าสู่ระบบสําเร็จ",
-      200,
-      payload
+      payload,
     );
     const cookieStore = await cookies();
     cookieStore.set({
